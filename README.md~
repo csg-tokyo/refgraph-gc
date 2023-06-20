@@ -1,0 +1,106 @@
+### Version
+
+ruby 3.1.2p20 (2022-04-12 revision 4ab20c2967) + refgraph
+
+### How to build this Ruby.
+
+
+- on Ubuntu 22.04
+
+```
+$ apt install autoconf bison ruby libreadline-dev libffi-dev libssl-dev
+$ apt install clang
+$ git clone git@github.com:csg-tokyo/ruby-refgraph.git
+$ autoconf
+$ autoreconf --install    # or 'automake -a -c'?
+$ mkdir build
+$ cd build
+$ CC=clang ../configure --prefix /usr/local/lib/rbenv/versions/3.1.2-refgraph --disable-install-doc
+$ make -j install
+$ cd ..
+$ rbenv shell 3.1.2-refgraph
+$ rbenv version    # 3.1.2-refgraph
+```
+
+Run `autoreconf` only when ../configure fails.
+
+We observed that the behavior of Ruby-refgraph is weird when it is built
+with GCC 11.  Use Clang 14.
+
+- on Ubuntu 20.04
+
+```
+$ apt install autoconf bison ruby libreadline-dev libffi-dev libssl-dev
+$ git clone git@github.com:csg-tokyo/ruby-refgraph.git
+$ autoconf
+$ mkdir build
+$ cd build
+$ ../configure --prefix $HOME/.rbenv/versions/3.1.2-refgraph --disable-install-doc
+$ make -j install
+$ cd ..
+$ rbenv shell 3.1.2-refgraph
+$ rbenv version    # 3.1.2-refgraph
+```
+
+- on macOS
+
+```
+$ brew install openssl
+$ git clone git@github.com:csg-tokyo/ruby-refgraph.git
+$ ./autogen.sh
+$ autoconf
+$ ./configure --with-openssl-dir=$(brew --prefix openssl@1.1) --prefix $HOME/.rbenv/versions/3.1.2-refgraph --disable-install-doc
+$ make -j install
+$ rbenv shell 3.1.2-refgraph
+$ rbenv version    # 3.1.2-refgraph
+```
+
+You might want to specify the openssl directory
+as `--with-openssl-dir=$(brew --prefix openssl)` or
+as `--with-openssl-dir=/opt/homebrew/opt/openssl@1.1` when
+multiple versions of openssl are installed.
+
+### How to use Refgraph
+
+After building and installing Ruby with refgraph extension,
+install `jscall`.  We below assume that the execution environment
+of Ruby is managed by `rbenv`.
+
+```
+$ cd
+$ rbenv shell 3.1.2-refgraph
+$ cd ./refgraph
+$ bin/setup     # or install jscall by gem install jscall
+$ bundle exec rake build
+$ gem install pkg/refgraph-0.1.0.gem
+```
+
+`bundle exec rake install` does not work for some unknown reason.
+
+Now you can use Ruby-Refgraph at any directory after executing
+this command:
+
+```
+$ rbenv shell 3.1.2-refgraph
+```
+
+To test `refgraph` without installing it, run as follows.
+
+```
+$ cd refgraph
+$ irb -I ./lib          # REPL starts
+```
+
+### How to make a new gem
+
+```
+$ cd
+$ rbenv shell 3.1.2-refgraph
+$ bundle gem refgraph --ext
+$ cd refgraph
+$ vi refgraph.gemspec  # fill out TODO
+$ bin/setup
+$ bundle exec rake
+$ irb -I lib
+irb> require "refgraph"
+```
